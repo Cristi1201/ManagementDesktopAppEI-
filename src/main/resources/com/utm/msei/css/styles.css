@@ -1,0 +1,22 @@
+.button {
+    -fx-background-color: #5656bd;
+    -fx-text-fill: white;
+    -fx-padding: 10 20;
+    -fx-border-radius: 5;
+    -fx-transition: all 0.5s ease 3s;
+}
+
+.button:hover {
+    -fx-background-color: #5a73d9;
+    -fx-translate-y: -2;
+}
+
+.button:pressed {
+    -fx-background-color: purple;
+    -fx-translate-y: 2;
+}
+
+
+.text-field {
+    -fx-text-fill: #173c8f;
+}

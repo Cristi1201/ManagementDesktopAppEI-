@@ -6,9 +6,10 @@ import java.util.Objects;
 @Entity
 @Table(name = "public.orar", schema = "public", catalog = "postgres")
 public class OrarEntity {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+    @SequenceGenerator(name = "seq", sequenceName = "seq", allocationSize = 1)
     private int id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_disc_prof", nullable = false)

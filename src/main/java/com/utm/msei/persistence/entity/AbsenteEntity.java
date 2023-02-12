@@ -7,9 +7,10 @@ import java.util.Objects;
 @Entity
 @Table(name = "public.absente", schema = "public", catalog = "postgres")
 public class AbsenteEntity {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+    @SequenceGenerator(name = "seq", sequenceName = "seq", allocationSize = 1)
     private int id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_elev", nullable = false)

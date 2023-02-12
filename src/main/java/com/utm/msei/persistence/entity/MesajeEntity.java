@@ -9,9 +9,10 @@ import java.util.Objects;
 @Entity
 @Table(name = "public.mesaje", schema = "public", catalog = "postgres")
 public class MesajeEntity {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+    @SequenceGenerator(name = "seq", sequenceName = "seq", allocationSize = 1)
     private int id;
     @Basic
     @Column(name = "text")

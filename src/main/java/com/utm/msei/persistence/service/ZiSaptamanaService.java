@@ -1,8 +1,8 @@
 package com.utm.msei.persistence.service;
 
-import com.utm.msei.persistence.dto.ZiSaptamanaEntityDto;
-import com.utm.msei.persistence.mapper.ZiSaptamanaEntityMapperImpl;
-import com.utm.msei.persistence.repository.ZiSaptamanaEntityRepository;
+import com.utm.msei.persistence.dto.ZiSaptamanaDto;
+import com.utm.msei.persistence.mapper.ZiSaptamanaMapper;
+import com.utm.msei.persistence.repository.ZiSaptamanaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,18 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ZiSaptamanaService {
 
-    private final ZiSaptamanaEntityRepository ZiSaptamanaEntityRepository;
+    private final ZiSaptamanaRepository ZiSaptamanaRepository;
 
+    private final ZiSaptamanaMapper ziSaptamanaMapper;
 
     @Autowired
-    public ZiSaptamanaService(ZiSaptamanaEntityRepository ziSaptamanaEntityRepository) {
-        this.ZiSaptamanaEntityRepository = ziSaptamanaEntityRepository;
+    public ZiSaptamanaService(ZiSaptamanaRepository ziSaptamanaRepository, ZiSaptamanaMapper ziSaptamanaMapper) {
+        this.ZiSaptamanaRepository = ziSaptamanaRepository;
+        this.ziSaptamanaMapper = ziSaptamanaMapper;
     }
 
     @Transactional
-    public ZiSaptamanaEntityDto save(ZiSaptamanaEntityDto ziSaptamanaEntityDto) {
-        ZiSaptamanaEntityMapperImpl ziSaptamanaEntityMapper = new ZiSaptamanaEntityMapperImpl();
-        return ziSaptamanaEntityMapper.toDto(ZiSaptamanaEntityRepository.save(ziSaptamanaEntityMapper.toEntity(ziSaptamanaEntityDto)));
+    public ZiSaptamanaDto save(ZiSaptamanaDto ziSaptamanaDto) {
+        return ziSaptamanaMapper.toDto(ZiSaptamanaRepository.save(ziSaptamanaMapper.toEntity(ziSaptamanaDto)));
     }
-
 }

@@ -24,4 +24,13 @@ public class AdministratieService {
     public AdministratieDto save(AdministratieDto administratieDto) {
         return administratieMapper.toDto(administratieRepository.save(administratieMapper.toEntity(administratieDto)));
     }
+
+    @Transactional
+    public void delete(int idAdmin) {
+        if (administratieRepository.existsById(idAdmin)) {
+            administratieRepository.deleteById(idAdmin);
+        } else {
+            throw new IllegalStateException("no user");
+        }
+    }
 }

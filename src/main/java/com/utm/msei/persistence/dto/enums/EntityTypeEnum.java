@@ -1,9 +1,9 @@
-package com.utm.msei.persistence.entity.enums;
+package com.utm.msei.persistence.dto.enums;
 
 public enum EntityTypeEnum {
 
     ADMINISTRATION("administration"),
-    STUDENT("elev"),
+    STUDENT("student"),
     PROFESSOR("professor"),
     PARENT("parent");
 

@@ -8,9 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
-@Component
-
 public class ResetPassword {
 
     @FXML

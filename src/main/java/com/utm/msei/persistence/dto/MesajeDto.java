@@ -1,7 +1,7 @@
 package com.utm.msei.persistence.dto;
 
 import com.utm.msei.persistence.entity.MesajeEntity;
-import com.utm.msei.persistence.entity.enums.EntityTypeEnum;
+import com.utm.msei.persistence.dto.enums.EntityTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;

@@ -14,121 +14,6 @@
         <junit.version>5.8.2</junit.version>
     </properties>
 
-    <!--    <dependencies>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.openjfx</groupId>-->
-    <!--            <artifactId>javafx-controls</artifactId>-->
-    <!--            <version>19</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.openjfx</groupId>-->
-    <!--            <artifactId>javafx-fxml</artifactId>-->
-    <!--            <version>19</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.controlsfx</groupId>-->
-    <!--            <artifactId>controlsfx</artifactId>-->
-    <!--            <version>11.1.1</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.kordamp.bootstrapfx</groupId>-->
-    <!--            <artifactId>bootstrapfx-core</artifactId>-->
-    <!--            <version>0.4.0</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.junit.jupiter</groupId>-->
-    <!--            <artifactId>junit-jupiter-api</artifactId>-->
-    <!--            <version>${junit.version}</version>-->
-    <!--            <scope>test</scope>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.junit.jupiter</groupId>-->
-    <!--            <artifactId>junit-jupiter-engine</artifactId>-->
-    <!--            <version>${junit.version}</version>-->
-    <!--            <scope>test</scope>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.hibernate</groupId>-->
-    <!--            <artifactId>hibernate-core</artifactId>-->
-    <!--            <version>5.6.14.Final</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>jakarta.persistence</groupId>-->
-    <!--            <artifactId>jakarta.persistence-api</artifactId>-->
-    <!--            <version>2.2.3</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.springframework</groupId>-->
-    <!--            <artifactId>spring-core</artifactId>-->
-    <!--            <version>6.0.4</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.springframework.boot</groupId>-->
-    <!--            <artifactId>spring-boot-starter-data-jpa</artifactId>-->
-    <!--            <version>2.6.4</version>-->
-    <!--        </dependency>-->
-
-    <!--&lt;!&ndash;        https://stackoverflow.com/questions/41170661/spring-data-jpa-consider-defining-a-bean-named-entitymanagerfactory-in-your&ndash;&gt;-->
-    <!--&lt;!&ndash;        <dependency>&ndash;&gt;-->
-    <!--&lt;!&ndash;            <groupId>org.springframework.data</groupId>&ndash;&gt;-->
-    <!--&lt;!&ndash;            <artifactId>spring-data-jpa</artifactId>&ndash;&gt;-->
-    <!--&lt;!&ndash;            <version>2.7.6</version>&ndash;&gt;-->
-    <!--&lt;!&ndash;        </dependency>&ndash;&gt;-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.springframework</groupId>-->
-    <!--            <artifactId>spring-beans</artifactId>-->
-    <!--            <version>6.0.4</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.springframework</groupId>-->
-    <!--            <artifactId>spring-tx</artifactId>-->
-    <!--            <version>6.0.4</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.mapstruct</groupId>-->
-    <!--            <artifactId>mapstruct</artifactId>-->
-    <!--            <version>1.5.3.Final</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.projectlombok</groupId>-->
-    <!--            <artifactId>lombok</artifactId>-->
-    <!--            <version>1.18.24</version>-->
-    <!--            <scope>compile</scope>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.hibernate</groupId>-->
-    <!--            <artifactId>hibernate-commons-annotations</artifactId>-->
-    <!--            <version>3.2.0.Final</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.springframework.boot</groupId>-->
-    <!--            <artifactId>spring-boot-starter-web</artifactId>-->
-    <!--            <version>RELEASE</version>-->
-    <!--            <scope>compile</scope>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.springframework</groupId>-->
-    <!--            <artifactId>spring-core</artifactId>-->
-    <!--            <version>6.0.4</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.springframework</groupId>-->
-    <!--            <artifactId>spring-context</artifactId>-->
-    <!--            <version>6.0.4</version>-->
-    <!--        </dependency>-->
-
-    <!--        <dependency>-->
-    <!--            <groupId>org.slf4j</groupId>-->
-    <!--            <artifactId>slf4j-api</artifactId>-->
-    <!--            <version>2.0.6</version>-->
-    <!--        </dependency>-->
-
-    <!--&lt;!&ndash;        <dependency>&ndash;&gt;-->
-    <!--&lt;!&ndash;            <groupId>org.springframework</groupId>&ndash;&gt;-->
-    <!--&lt;!&ndash;            <artifactId>spring-web</artifactId>&ndash;&gt;-->
-    <!--&lt;!&ndash;            <version>6.0.4</version>&ndash;&gt;-->
-    <!--&lt;!&ndash;        </dependency>&ndash;&gt;-->
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -341,6 +226,18 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-swing -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>11-ea+24</version>
         </dependency>
 
     </dependencies>

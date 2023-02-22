@@ -1,12 +1,9 @@
 package com.utm.msei.persistence.entity;
 
 import javax.persistence.*;
-import java.sql.Date;
-import java.util.Arrays;
-import java.util.Objects;
 
 @Entity
-@Table(name = "public.elev", schema = "public", catalog = "postgres")
+@Table(name = "public_elev", schema = "public", catalog = "msei_db")
 public class ElevEntity {
     @Id
     @Column(name = "id", nullable = false)
@@ -14,29 +11,14 @@ public class ElevEntity {
     @SequenceGenerator(name = "seq", sequenceName = "seq", allocationSize = 1)
     private int id;
     @Basic
-    @Column(name = "nume")
-    private String nume;
-    @Basic
-    @Column(name = "prenume")
-    private String prenume;
-    @Basic
-    @Column(name = "idnp")
-    private String idnp;
-    @Basic
-    @Column(name = "data_nastere")
-    private Date dataNastere;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_clasa", nullable = false)
-    private ClasaEntity idClasa;
+    @Column(name = "id_clasa")
+    private Integer idClasa;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_parinti", nullable = false)
     private ParintiEntity idParinti;
-    @Basic
-    @Column(name = "telefon")
-    private String telefon;
-    @Basic
-    @Column(name = "poza")
-    private byte[] poza;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_user")
+    private UserEntity idUser;
 
     public int getId() {
         return id;
@@ -46,43 +28,11 @@ public class ElevEntity {
         this.id = id;
     }
 
-    public String getNume() {
-        return nume;
-    }
-
-    public void setNume(String nume) {
-        this.nume = nume;
-    }
-
-    public String getPrenume() {
-        return prenume;
-    }
-
-    public void setPrenume(String prenume) {
-        this.prenume = prenume;
-    }
-
-    public String getIdnp() {
-        return idnp;
-    }
-
-    public void setIdnp(String idnp) {
-        this.idnp = idnp;
-    }
-
-    public Date getDataNastere() {
-        return dataNastere;
-    }
-
-    public void setDataNastere(Date dataNastere) {
-        this.dataNastere = dataNastere;
-    }
-
-    public ClasaEntity getIdClasa() {
+    public Integer getIdClasa() {
         return idClasa;
     }
 
-    public void setIdClasa(ClasaEntity idClasa) {
+    public void setIdClasa(Integer idClasa) {
         this.idClasa = idClasa;
     }
 
@@ -94,34 +44,35 @@ public class ElevEntity {
         this.idParinti = idParinti;
     }
 
-    public String getTelefon() {
-        return telefon;
+    public UserEntity getIdUser() {
+        return idUser;
     }
 
-    public void setTelefon(String telefon) {
-        this.telefon = telefon;
-    }
-
-    public byte[] getPoza() {
-        return poza;
-    }
-
-    public void setPoza(byte[] poza) {
-        this.poza = poza;
+    public void setIdUser(UserEntity idUser) {
+        this.idUser = idUser;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         ElevEntity that = (ElevEntity) o;
-        return id == that.id && idClasa == that.idClasa && Objects.equals(nume, that.nume) && Objects.equals(prenume, that.prenume) && Objects.equals(idnp, that.idnp) && Objects.equals(dataNastere, that.dataNastere) && Objects.equals(idParinti, that.idParinti) && Objects.equals(telefon, that.telefon) && Arrays.equals(poza, that.poza);
+
+        if (id != that.id) return false;
+        if (idClasa != null ? !idClasa.equals(that.idClasa) : that.idClasa != null) return false;
+        if (idParinti != null ? !idParinti.equals(that.idParinti) : that.idParinti != null) return false;
+        if (idUser != null ? !idUser.equals(that.idUser) : that.idUser != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, nume, prenume, idnp, dataNastere, idClasa, idParinti, telefon);
-        result = 31 * result + Arrays.hashCode(poza);
+        int result = id;
+        result = 31 * result + (idClasa != null ? idClasa.hashCode() : 0);
+        result = 31 * result + (idParinti != null ? idParinti.hashCode() : 0);
+        result = 31 * result + (idUser != null ? idUser.hashCode() : 0);
         return result;
     }
 }

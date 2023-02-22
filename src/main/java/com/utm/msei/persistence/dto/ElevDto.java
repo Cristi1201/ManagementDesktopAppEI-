@@ -1,8 +1,11 @@
 package com.utm.msei.persistence.dto;
 
 import com.utm.msei.persistence.entity.ElevEntity;
+import com.utm.msei.persistence.entity.ParintiEntity;
+import com.utm.msei.persistence.entity.UserEntity;
 import lombok.Data;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
 
@@ -12,25 +15,22 @@ import java.sql.Date;
 @Data
 public class ElevDto implements Serializable {
     private int id;
-    private String nume;
-    private String prenume;
-    private String idnp;
-    private Date dataNastere;
-    private ClasaDto idClasa;
-    private ParintiDto idParinti;
-    private String telefon;
-    private byte[] poza;
+    private Integer idClasa;
+    private ParintiEntity idParinti;
+    private UserEntity idUser;
 
     public ElevDto() {}
 
-    public ElevDto(String nume, String prenume, String idnp, Date dataNastere, ClasaDto idClasa, ParintiDto idParinti, String telefon, byte[] poza) {
-        this.nume = nume;
-        this.prenume = prenume;
-        this.idnp = idnp;
-        this.dataNastere = dataNastere;
+    public ElevDto(Integer idClasa, ParintiEntity idParinti, UserEntity idUser) {
         this.idClasa = idClasa;
         this.idParinti = idParinti;
-        this.telefon = telefon;
-        this.poza = poza;
+        this.idUser = idUser;
+    }
+
+    public ElevDto(int id, Integer idClasa, ParintiEntity idParinti, UserEntity idUser) {
+        this.id = id;
+        this.idClasa = idClasa;
+        this.idParinti = idParinti;
+        this.idUser = idUser;
     }
 }

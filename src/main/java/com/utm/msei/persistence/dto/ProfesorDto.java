@@ -1,8 +1,10 @@
 package com.utm.msei.persistence.dto;
 
 import com.utm.msei.persistence.entity.ProfesorEntity;
+import com.utm.msei.persistence.entity.UserEntity;
 import lombok.Data;
 
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -11,21 +13,19 @@ import java.io.Serializable;
 @Data
 public class ProfesorDto implements Serializable {
     private int id;
-    private String nume;
-    private String prenume;
-    private String idnp;
-    private String telefon;
-    private String gradDidactic;
-    private byte[] poza;
+    private String gradDidactic;  // TODO to review
+    private UserEntity idUser;
 
     public ProfesorDto() {}
 
-    public ProfesorDto(String nume, String prenume, String idnp, String telefon, String gradDidactic, byte[] poza) {
-        this.nume = nume;
-        this.prenume = prenume;
-        this.idnp = idnp;
-        this.telefon = telefon;
+    public ProfesorDto(String gradDidactic, UserEntity idUser) {
         this.gradDidactic = gradDidactic;
-        this.poza = poza;
+        this.idUser = idUser;
+    }
+
+    public ProfesorDto(int id, String gradDidactic, UserEntity idUser) {
+        this.id = id;
+        this.gradDidactic = gradDidactic;
+        this.idUser = idUser;
     }
 }

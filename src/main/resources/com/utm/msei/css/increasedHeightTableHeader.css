@@ -1,0 +1,12 @@
+.table-view .column-header .label {
+    -fx-padding: 8px;
+    -fx-text-fill: white;
+}
+.column-header {
+    -fx-background-color: #3e57c0;
+}
+
+.table-view .column-header .arrow  {
+    -fx-background-color: white;
+}
+

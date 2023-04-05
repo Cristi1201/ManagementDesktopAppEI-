@@ -15,26 +15,28 @@ public class ImageHandler {
 
 
     public static byte[] imageToByte() {
-        try {
-            return ImageHandler.imageToByte(null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return ImageHandler.imageToByte(null);
     }
 
-    public static byte[] imageToByte(String imagePath) throws IOException {
-        if (imagePath != null) {
-            BufferedImage bImage = ImageIO.read(new File(imagePath));
+    public static byte[] imageToByte(String imagePath) {
+        try {
+            if (imagePath != null) {
+                if (imagePath.startsWith("file:/")) {
+                    imagePath = imagePath.replace("file:/", "");
+                }
+                BufferedImage bImage = ImageIO.read(new File(imagePath));
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ImageIO.write(bImage, "jpg", bos);
+                return bos.toByteArray();
+            }
+            BufferedImage bImage = ImageIO.read(new File("D:\\Univer\\Licenta\\Aplicatie\\MSEI\\MSEI\\src\\main\\resources\\com\\utm\\msei\\images\\defaultPersonImage.jpg"));
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ImageIO.write(bImage, "jpg", bos);
             return bos.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-//        BufferedImage bImage = ImageIO.read(new File("../resources/com/utm/msei/images/defaultPersonImage.jpg"));
-        BufferedImage bImage = ImageIO.read(new File("D:\\Univer\\Licenta\\Aplicatie\\MSEI\\MSEI\\src\\main\\resources\\com\\utm\\msei\\images\\defaultPersonImage.jpg"));
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ImageIO.write(bImage, "jpg", bos);
-        return bos.toByteArray();
+        return null;
     }
 
     public static WritableImage byteToImage(byte[] byteImg) {

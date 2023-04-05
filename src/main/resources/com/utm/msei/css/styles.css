@@ -1,4 +1,30 @@
-.button {
+.button.ok {
+    -fx-background-color: #EAF6FB; /* very light blue */
+    -fx-border-color: #66B2FF; /* blue a bit more solid */
+    -fx-text-fill: #05119b;
+    -fx-alignment: center;
+    -fx-text-decoration: none;
+    -fx-display: inline-block;
+    -fx-margin: 20px auto;
+    -fx-cursor: pointer;
+    -fx-border-radius: 20px;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.button.ok:hover {
+    -fx-background-color: #BFE9FF;
+    -fx-border-color: #3399FF;
+    -fx-padding: 20px 20px;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+}
+
+.button.ok:pressed {
+    -fx-background-color: #c70237;
+    -fx-translate-y: 2;
+}
+
+.button.action {
     -fx-background-color: #5656bd;
     -fx-text-fill: white;
     -fx-padding: 10 20;
@@ -6,12 +32,12 @@
     -fx-transition: all 0.5s ease 3s;
 }
 
-.button:hover {
+.button.action:hover {
     -fx-background-color: #5a73d9;
     -fx-translate-y: -2;
 }
 
-.button:pressed {
+.button.action:pressed {
     -fx-background-color: purple;
     -fx-translate-y: 2;
 }
@@ -20,3 +46,9 @@
 .text-field {
     -fx-text-fill: #173c8f;
 }
+
+.table-view .column-header-background {
+    -fx-background-size: 1.0 30.0;
+}
+
+

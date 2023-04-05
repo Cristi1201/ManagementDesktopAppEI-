@@ -27,4 +27,13 @@ public class ProfesorService {
     public ProfesorDto save(ProfesorDto profesorDto) {
         return profesorMapper.toDto(profesorRepository.save(profesorMapper.toEntity(profesorDto)));
     }
+
+    public void updateUser(ProfesorDto profesorDto) {
+        profesorRepository.updateIdUserBy(profesorMapper.toEntity(profesorDto).getIdUser());
+    }
+
+    @Transactional
+    public ProfesorDto findByUserId(int id) {
+        return profesorMapper.toDto(profesorRepository.findByIdUser_Id(id));
+    }
 }

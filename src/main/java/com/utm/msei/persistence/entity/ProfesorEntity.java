@@ -1,5 +1,8 @@
 package com.utm.msei.persistence.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 
 @Entity
@@ -10,9 +13,6 @@ public class ProfesorEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
     @SequenceGenerator(name = "seq", sequenceName = "seq", allocationSize = 1)
     private int id;
-    @Basic
-    @Column(name = "grad_didactic")
-    private String gradDidactic;  // TODO to review
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")
     private UserEntity idUser;
@@ -23,14 +23,6 @@ public class ProfesorEntity {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getGradDidactic() {
-        return gradDidactic;
-    }
-
-    public void setGradDidactic(String gradDidactic) {
-        this.gradDidactic = gradDidactic;
     }
 
     public UserEntity getIdUser() {
@@ -49,7 +41,6 @@ public class ProfesorEntity {
         ProfesorEntity that = (ProfesorEntity) o;
 
         if (id != that.id) return false;
-        if (gradDidactic != null ? !gradDidactic.equals(that.gradDidactic) : that.gradDidactic != null) return false;
         if (idUser != null ? !idUser.equals(that.idUser) : that.idUser != null) return false;
 
         return true;
@@ -58,7 +49,6 @@ public class ProfesorEntity {
     @Override
     public int hashCode() {
         int result = id;
-        result = 31 * result + (gradDidactic != null ? gradDidactic.hashCode() : 0);
         result = 31 * result + (idUser != null ? idUser.hashCode() : 0);
         return result;
     }

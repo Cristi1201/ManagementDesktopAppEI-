@@ -33,4 +33,13 @@ public class AdministratieService {
             throw new IllegalStateException("no user");
         }
     }
+
+    public void updateUser(AdministratieDto administratieDto) {
+        administratieRepository.updateIdUserBy(administratieMapper.toEntity(administratieDto).getIdUser());
+    }
+
+    @Transactional
+    public AdministratieDto findByUserId(int id) {
+        return administratieMapper.toDto(administratieRepository.findByIdUser_Id(id));
+    }
 }

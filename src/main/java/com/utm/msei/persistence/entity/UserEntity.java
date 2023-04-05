@@ -7,7 +7,11 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "public_user", schema = "public", catalog = "msei_db")
@@ -26,9 +30,9 @@ public class UserEntity {
     @Length(min = 20, max = 100)
     private String password;
     @Basic
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     @Column(name = "user_type")
-    private EntityTypeEnum userType;
+    private String userType;
     @Basic
     @Column(name = "nume")
     private String nume;
@@ -43,7 +47,7 @@ public class UserEntity {
     private String telefon;
     @Basic
     @Column(name = "data_nastere")
-    private Date dataNastere;
+    private LocalDate dataNastere;
     @Basic
     @Column(name = "poza")
     private byte[] poza;
@@ -72,12 +76,24 @@ public class UserEntity {
         this.password = password;
     }
 
-    public EntityTypeEnum getUserType() {
-        return userType;
+    public List<EntityTypeEnum> getUserType() {
+        List<EntityTypeEnum> userTypes = new ArrayList<>();
+        for (String en : this.userType.split(",")) {
+            en = en.trim();
+            if (en.startsWith("[")) {
+                en = en.substring(1);
+            }
+            if (en.endsWith("]")) {
+                en = en.substring(0, en.length() - 1);
+            }
+            en = en.toUpperCase();
+            userTypes.add(EntityTypeEnum.valueOf(en));
+        }
+        return userTypes;
     }
 
-    public void setUserType(EntityTypeEnum userType) {
-        this.userType = userType;
+    public void setUserType(List<EntityTypeEnum> userType) {
+        this.userType = userType.stream().map(EntityTypeEnum::toString).collect(Collectors.joining(","));
     }
 
     public String getNume() {
@@ -112,11 +128,11 @@ public class UserEntity {
         this.telefon = telefon;
     }
 
-    public Date getDataNastere() {
+    public LocalDate getDataNastere() {
         return dataNastere;
     }
 
-    public void setDataNastere(Date dataNastere) {
+    public void setDataNastere(LocalDate dataNastere) {
         this.dataNastere = dataNastere;
     }
 

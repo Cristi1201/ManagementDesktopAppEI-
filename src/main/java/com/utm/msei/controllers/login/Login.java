@@ -1,9 +1,12 @@
 package com.utm.msei.controllers.login;
 
-import com.utm.msei.controllers.Administratie;
+import com.utm.msei.controllers.interfaces.ControllerI;
+import com.utm.msei.converter.ImageHandler;
 import com.utm.msei.handler.StageHandler;
+import com.utm.msei.persistence.dto.AdministratieDto;
 import com.utm.msei.persistence.dto.UserDto;
 import com.utm.msei.persistence.dto.enums.EntityTypeEnum;
+import com.utm.msei.security.PasswordHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -12,10 +15,14 @@ import javafx.scene.text.Text;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.utm.msei.Main.serviceHandler;
 
-public class Login {
+public class Login implements ControllerI {
 
     @FXML
     private Label welcomeText;
@@ -26,12 +33,12 @@ public class Login {
     @FXML
     private Text wrongCredentials, resetCredentials;
 
-    public static UserDto user;
+    @FXML
+    private Text numePrenume, status;//, email, telefon;
 
     public static UserHandler userHandler = new UserHandler();
 
-    public void start() throws IOException {
-        StageHandler.setScene("fxml/main.fxml");
+    public void start() {
     }
 
     @FXML
@@ -47,12 +54,25 @@ public class Login {
             if (userDto == null) {
                 wrongCredentials.setVisible(true);
             } else {
-//                UserI entity;
-                if (EntityTypeEnum.ADMINISTRATION.equals(userDto.getUserType())) {
+                System.out.println(userDto.getUserType());
+                if (userDto.getUserType().contains(EntityTypeEnum.DIRECTOR) || userDto.getUserType().contains(EntityTypeEnum.ADJUNCT)) {
                     userHandler.setUser(userDto);
-                    Administratie entity = new Administratie();
-                    entity.start();
-                } else if (EntityTypeEnum.PROFESSOR.equals(userDto.getUserType())) {
+
+//                    StageHandler.setScene("fxml/administratie.fxml");
+//
+//                    numePrenume.setText(userHandler.getUser().getNume() + userHandler.getUser().getPrenume());
+//                    status.setText(userHandler.getUser().getUserType().toString());
+//                    email.setText(useserrHandler.getUser().getEmail());
+////                    telefon.setText(uHandler.getUser().getTelefon());
+
+                    StageHandler.setScene("fxml/administratie.fxml");
+
+//                    Administratie entity = new Administratie();
+//                    entity.start();
+
+//                    Administratie.start();
+
+                } else if (EntityTypeEnum.PROFESOR.equals(userDto.getUserType())) {
 //                    user = new Profesor(userDto);
 //                    entity.start();
 //                } else if (EntityTypeEnum.PROFESSOR.equals(userDto.getUserType())) {
@@ -83,17 +103,16 @@ public class Login {
 //        System.out.println(PasswordHandler.validatePassword(pass, salthash[0], salthash[1]));
 //
 //        userDto.setPassword(rec);
-//        userDto.setUserType(EntityTypeEnum.ADMINISTRATION);
+//        userDto.setUserType(List.of(EntityTypeEnum.DIRECTOR));
 //        userDto.setNume("Iuliana");
 //        userDto.setPrenume("Bragovschi");
 //        userDto.setTelefon("079112233");
 //        userDto.setIdnp("1234567890123");
-//        userDto.setDataNastere(Date.valueOf(LocalDate.of(1976, 1, 17)));
-//        System.out.println(Arrays.toString(ImageHandler.imageToByte()));
+//        userDto.setDataNastere(LocalDate.of(1976, 1, 17));
 //        userDto.setPoza(ImageHandler.imageToByte());
 //
-//
-//        AdministratieDto administratieDto = new AdministratieDto(AdministratorStatusEnum.DIRECTOR, userDto);
+//        UserDto u = serviceHandler.getUserService().save(userDto);
+//        AdministratieDto administratieDto = new AdministratieDto(u);
 //        serviceHandler.getAdministratieService().save(administratieDto);
     }
 

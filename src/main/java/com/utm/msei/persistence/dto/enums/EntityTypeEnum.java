@@ -1,11 +1,14 @@
 package com.utm.msei.persistence.dto.enums;
 
+import java.util.List;
+
 public enum EntityTypeEnum {
 
-    ADMINISTRATION("administration"),
-    STUDENT("student"),
-    PROFESSOR("professor"),
-    PARENT("parent");
+    DIRECTOR("Director"),
+    ADJUNCT("Dir. Adjunct"),
+    PROFESOR("Profesor"),
+    ELEV("Elev"),
+    PARINTE("Parinte");
 
     private final String type;
 

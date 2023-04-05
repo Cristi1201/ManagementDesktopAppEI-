@@ -2,6 +2,7 @@ package com.utm.msei.persistence.dto;
 
 import com.utm.msei.persistence.entity.ProfesorEntity;
 import com.utm.msei.persistence.entity.UserEntity;
+import com.utm.msei.persistence.mapper.UserMapper;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -13,19 +14,16 @@ import java.io.Serializable;
 @Data
 public class ProfesorDto implements Serializable {
     private int id;
-    private String gradDidactic;  // TODO to review
-    private UserEntity idUser;
+    private UserDto idUser;
 
     public ProfesorDto() {}
 
-    public ProfesorDto(String gradDidactic, UserEntity idUser) {
-        this.gradDidactic = gradDidactic;
+    public ProfesorDto(UserDto idUser) {
         this.idUser = idUser;
     }
 
-    public ProfesorDto(int id, String gradDidactic, UserEntity idUser) {
+    public ProfesorDto(int id, UserDto idUser) {
         this.id = id;
-        this.gradDidactic = gradDidactic;
         this.idUser = idUser;
     }
 }

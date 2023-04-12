@@ -18,4 +18,8 @@ public class DisciplinaDto implements Serializable {
     public DisciplinaDto(String disciplina) {
         this.disciplina = disciplina;
     }
+    public DisciplinaDto(int id, String disciplina) {
+        this.id = id;
+        this.disciplina = disciplina;
+    }
 }

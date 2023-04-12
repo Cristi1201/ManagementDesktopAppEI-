@@ -12,12 +12,10 @@ public class DisciplinaProfesorEntity {
     @SequenceGenerator(name = "seq", sequenceName = "seq", allocationSize = 1)
     private int id;
 
-    // TODO see this relationship here
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "id_profesor", nullable = false)
     private ProfesorEntity idProfesor;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "id_disciplina", nullable = false)
     private DisciplinaEntity idDisciplina;
 

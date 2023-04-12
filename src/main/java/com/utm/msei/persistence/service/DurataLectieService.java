@@ -1,14 +1,14 @@
 package com.utm.msei.persistence.service;
 
 import com.utm.msei.persistence.dto.DurataLectieDto;
-import com.utm.msei.persistence.dto.ElevDto;
 import com.utm.msei.persistence.mapper.DurataLectieMapper;
-import com.utm.msei.persistence.mapper.ElevMapper;
 import com.utm.msei.persistence.repository.DurataLectieRepository;
-import com.utm.msei.persistence.repository.ElevRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DurataLectieService {
@@ -26,5 +26,10 @@ public class DurataLectieService {
     @Transactional
     public DurataLectieDto save(DurataLectieDto durataLectieDto) {
         return durataLectieMapper.toDto(durataLectieRepository.save(durataLectieMapper.toEntity(durataLectieDto)));
+    }
+
+    @Transactional
+    public List<DurataLectieDto> getAll() {
+        return durataLectieRepository.findAll().stream().map(durataLectieMapper::toDto).collect(Collectors.toList());
     }
 }

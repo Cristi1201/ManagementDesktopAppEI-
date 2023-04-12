@@ -1,12 +1,9 @@
 package com.utm.msei.controllers.login;
 
 import com.utm.msei.controllers.interfaces.ControllerI;
-import com.utm.msei.converter.ImageHandler;
 import com.utm.msei.handler.StageHandler;
-import com.utm.msei.persistence.dto.AdministratieDto;
 import com.utm.msei.persistence.dto.UserDto;
 import com.utm.msei.persistence.dto.enums.EntityTypeEnum;
-import com.utm.msei.security.PasswordHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -15,10 +12,6 @@ import javafx.scene.text.Text;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
 
 import static com.utm.msei.Main.serviceHandler;
 

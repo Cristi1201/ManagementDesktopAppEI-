@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Data
 public class ClasaDto implements Serializable {
     private int id;
+    private ProfesorDto profesorDto;
     private String nume;
 
     public ClasaDto() {}

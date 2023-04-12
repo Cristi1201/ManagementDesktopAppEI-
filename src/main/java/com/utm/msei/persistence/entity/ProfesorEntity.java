@@ -1,8 +1,5 @@
 package com.utm.msei.persistence.entity;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import javax.persistence.*;
 
 @Entity
@@ -13,7 +10,7 @@ public class ProfesorEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
     @SequenceGenerator(name = "seq", sequenceName = "seq", allocationSize = 1)
     private int id;
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne()
     @JoinColumn(name = "id_user")
     private UserEntity idUser;
 

@@ -122,4 +122,8 @@ public class UserService {
         return userRepository.updateNumeAndPrenumeAndUserTypeAndIdnpAndTelefonAndDataNastereBy(userDto.getNume(), userDto.getPrenume(), userDto.getUserType().stream().map(Enum::name)
                 .collect(Collectors.joining(",")), userDto.getIdnp(), userDto.getTelefon(), userDto.getDataNastere(), userDto.getId());
     }
+
+    public void updatePassword(int id, String pass) {
+        userRepository.updatePasswordById(pass, id);
+    }
 }

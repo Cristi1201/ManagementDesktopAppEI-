@@ -1,17 +1,18 @@
 package com.utm.msei.controllers.administration;
 
 import com.utm.msei.controllers.administration.actions.CadreHandler;
+import com.utm.msei.controllers.administration.actions.ClaseComboBoxHandler;
+import com.utm.msei.controllers.administration.actions.DiscProfHandler;
+import com.utm.msei.controllers.administration.actions.OrarHandler;
 import com.utm.msei.controllers.interfaces.ControllerI;
-import com.utm.msei.converter.ImageHandler;
+import com.utm.msei.util.ImageHandler;
 import com.utm.msei.handler.StageHandler;
-import com.utm.msei.persistence.dto.AdministratieDto;
-import com.utm.msei.persistence.dto.ProfesorDto;
-import com.utm.msei.persistence.dto.UserDto;
+import com.utm.msei.persistence.dto.*;
 import com.utm.msei.persistence.dto.enums.EntityTypeEnum;
 import com.utm.msei.security.PasswordHandler;
+import com.utm.msei.util.PdfCreator;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -26,14 +27,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
-import net.bytebuddy.asm.Advice;
+import org.apache.logging.log4j.util.Strings;
 import org.controlsfx.control.CheckComboBox;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.utm.msei.Main.serviceHandler;
@@ -48,9 +49,11 @@ public class Administratie implements ControllerI {
     @FXML
     private Text numePrenumeAdmin, statusAdmin, emailAdmin, telefonAdmin, mesajSavePane;
 
+    @FXML
+    private PasswordField passwordNow, newPassword, repeatPassword;
 
     @FXML
-    private StackPane mainPaneAdmin, profesoriPaneAdmin, profesoriDisciplinePaneAdmin;
+    private StackPane mainPaneAdmin, profesoriPaneAdmin, profesoriDisciplinePaneAdmin, orarPaneAdmin, orarPane, alegeClasaPane, blankPane;
 
     @FXML
     private TableView<CadreHandler.CadreTable> tableCadre;
@@ -69,26 +72,61 @@ public class Administratie implements ControllerI {
     @FXML
     private TableColumn<CadreHandler.CadreTable, LocalDate> dataNastereColumn;
     @FXML
-    private Button addCadre, deleteCadre, saveCadreTable, cadreAdminBtn, profDiscAdminBtn, orarAdminBtn, eleviAdminBtn, buttonOk;
+    private Button addCadre, deleteCadre, saveCadreTable, cadreAdminBtn, profDiscAdminBtn, orarAdminBtn,
+            eleviAdminBtn, buttonOk, addDisciplina, deleteDisciplina, saveDiscipline, saveProfDiscTable,
+            alegeClasaOrarAdmin, saveOrar, downloadOrar, resetPasswordBtn, resetPasswordBtnAdmin, anuleazaResetPasswordBtn;
     @FXML
     private AnchorPane mainAdmin;
     @FXML
-    private Pane savePane;
+    private Pane savePane, resetPasswordPane;
     @FXML
     private HBox navBar;
     @FXML
     private VBox userVBox, actionTableCadre;
 
+
+    @FXML
+    private TableView<DiscProfHandler.DiscProfTable> profDiscTable;
+    @FXML
+    private TableColumn<DiscProfHandler.DiscProfTable, String> profesorColumn;
+    @FXML
+    private TableColumn<DiscProfHandler.DiscProfTable, List> disciplinaProfColumn;
+
+    @FXML
+    private TableView<DiscProfHandler.Discipline> disciplineTable;
+    @FXML
+    private TableColumn<DiscProfHandler.Discipline, String> disciplinaColumn;
+
+
+    @FXML
+    private ComboBox<String> claseComboBox = new ComboBox<>();
+    private DiscProfHandler discipline;
+
+    @FXML
+    private TableView<OrarHandler.OrarTable> orarTable;
+    @FXML
+    private TableColumn<OrarHandler.OrarTable, String> ziOrarColumn;
+    @FXML
+    private TableColumn<OrarHandler.OrarTable, String> durataOrarColumn;
+    @FXML
+    private TableColumn<OrarHandler.OrarTable, String> disciplinaOrarColumn;
+
     @FXML
     public void start() {
+        this.hideAll();
 
         // TODO noutati
-        // TODO SAVE PANE
+
+        final String[] salt_hash = PasswordHandler.getSaltAndHashFromRecord(userHandler.getUser().getPassword());
+        resetPasswordPane.setVisible(true);
+        // if email is the same as password (how it is when new user is created), change it
+        if (PasswordHandler.validatePassword(userHandler.getUser().getEmail(), salt_hash[0], salt_hash[1])) {
+            this.resetPassword();
+        }
 
         this.initCredentials();
         this.initPoza();
 
-        this.hideAll();
 
         navBar.setPadding(new Insets(10));
         navBar.setSpacing(10);
@@ -108,6 +146,10 @@ public class Administratie implements ControllerI {
         navBar.getChildren().addAll(leftSpacer, cadreAdminBtn, centerSpacer1, profDiscAdminBtn, centerSpacer2, orarAdminBtn, centerSpacer3, eleviAdminBtn, rightSpacer);
         navBar.setAlignment(Pos.CENTER_LEFT);
 
+        resetPasswordBtnAdmin.setOnAction(event -> {
+            this.resetPassword();
+        });
+
         cadreAdminBtn.setOnMouseClicked(event -> {
             this.showCadreAdmin();
         });
@@ -115,10 +157,238 @@ public class Administratie implements ControllerI {
         profDiscAdminBtn.setOnMouseClicked(event -> {
             this.showProfesoriDisciplineAdmin();
         });
-//        orarAdminBtn.setOnMouseClicked(event -> {
-//            this.showCadreAdmin();
-//        });
+        orarAdminBtn.setOnMouseClicked(event -> {
+            this.showChooseClasaAdmin();
+        });
+    }
 
+    @FXML
+    private void resetPassword() {
+        mainPaneAdmin.setVisible(true);
+        blankPane.setVisible(true);
+        resetPasswordPane.setVisible(true);
+        resetPasswordPane.toFront();
+        final String[] salt_hash = PasswordHandler.getSaltAndHashFromRecord(userHandler.getUser().getPassword());
+        navBar.setDisable(true);
+
+        anuleazaResetPasswordBtn.setOnAction(event -> {
+            passwordNow.setText(Strings.EMPTY);
+            newPassword.setText(Strings.EMPTY);
+            repeatPassword.setText(Strings.EMPTY);
+            navBar.setDisable(false);
+
+            this.hideAll();
+        });
+
+        resetPasswordBtn.setOnAction(event -> {
+            if (PasswordHandler.validatePassword(passwordNow.getText(), salt_hash[0], salt_hash[1]) &&
+                    newPassword.getText().equals(repeatPassword.getText()) &&
+                    !newPassword.getText().equals(passwordNow.getText())) {
+
+                Pattern uppers = Pattern.compile(".*[A-Z].*");
+                Pattern lower = Pattern.compile(".*[a-z].*");
+                Pattern numbers = Pattern.compile(".*\\d.*");
+
+                if (newPassword.getText().length() > 8 &&
+                        uppers.matcher(newPassword.getText()).matches() &&
+                        lower.matcher(newPassword.getText()).matches() &&
+                        numbers.matcher(newPassword.getText()).matches()) {
+
+                    String pass = newPassword.getText();
+
+                    String salt = PasswordHandler.generateSalt();
+                    String hash = PasswordHandler.hashPassword(pass, salt);
+                    String rec = PasswordHandler.getRecordFromSaltAndHash(salt, hash);
+                    serviceHandler.getUserService().updatePassword(userHandler.getUser().getId(), rec);
+
+                    passwordNow.setText(Strings.EMPTY);
+                    newPassword.setText(Strings.EMPTY);
+                    repeatPassword.setText(Strings.EMPTY);
+                    savePane.setVisible(true);
+                    mesajSavePane.setText("Succes");
+                    resetPasswordPane.setDisable(true);
+                    blankPane.setVisible(false);
+                    buttonOk.setOnAction(click -> {
+                        savePane.setVisible(false);
+                        resetPasswordPane.setDisable(false);
+                        resetPasswordPane.setVisible(false);
+                        navBar.setDisable(false);
+                    });
+                } else {
+                    savePane.setVisible(true);
+                    mesajSavePane.setText("Parolă slabă");
+                    resetPasswordPane.setDisable(true);
+                    buttonOk.setOnAction(click -> {
+                        savePane.setVisible(false);
+                        resetPasswordPane.setDisable(false);
+                    });
+                }
+            } else {
+                savePane.toFront();
+                savePane.setVisible(true);
+                mesajSavePane.setText("Ați introdus greșit");
+                resetPasswordPane.setDisable(true);
+                buttonOk.setOnAction(click -> {
+                    savePane.setVisible(false);
+                    resetPasswordPane.setDisable(false);
+                });
+            }
+        });
+    }
+
+    @FXML
+    private void showChooseClasaAdmin() {
+        this.hideAll();
+        mainPaneAdmin.setVisible(true);
+        orarPaneAdmin.setVisible(true);
+        alegeClasaPane.setVisible(true);
+        orarPane.setVisible(false);
+        orarTable.setVisible(false);
+
+        ClaseComboBoxHandler claseComboBoxHandler = new ClaseComboBoxHandler();
+
+        claseComboBox.setItems(FXCollections.observableArrayList(claseComboBoxHandler.getAllClase().stream().map(c -> c.getName()).collect(Collectors.toList())));
+
+        alegeClasaOrarAdmin.setOnAction(event -> {
+            String clasaName = claseComboBox.getSelectionModel().getSelectedItem();
+            if (clasaName != null) {
+                alegeClasaPane.setVisible(false);
+                this.showOrarAdmin(clasaName);
+            } else {
+                mesajSavePane.setText("Alegeti clasa");
+                savePane.setVisible(true);
+                buttonOk.setOnAction(click -> {
+                    savePane.setVisible(false);
+                });
+            }
+        });
+    }
+
+    @FXML
+    private void showOrarAdmin(String clasaName) {
+        alegeClasaPane.setVisible(false);
+        orarPane.setVisible(true);
+        orarTable.setVisible(true);
+        orarPane.setAlignment(saveOrar, Pos.BOTTOM_RIGHT);
+        orarPane.setAlignment(downloadOrar, Pos.BOTTOM_RIGHT);
+        orarPane.setMargin(downloadOrar, new Insets(0, 35, 0, 0));
+
+        OrarHandler orarHandler = new OrarHandler();
+
+        ziOrarColumn.setCellValueFactory(new PropertyValueFactory<OrarHandler.OrarTable, String>("zi"));
+        ziOrarColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        durataOrarColumn.setCellValueFactory(new PropertyValueFactory<OrarHandler.OrarTable, String>("durata"));
+        durataOrarColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        disciplinaOrarColumn.setCellValueFactory(new PropertyValueFactory<OrarHandler.OrarTable, String>("discProf"));
+        disciplinaOrarColumn.setCellFactory(column -> new TableCell<OrarHandler.OrarTable, String>() {
+            private final ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList(orarHandler.getAllDiscProfAsString()));
+
+            {
+                comboBox.getItems().add(Strings.EMPTY);
+                setGraphic(null);
+                comboBox.setOnAction(event -> {
+                    OrarHandler.OrarTable orarRow = getTableView().getItems().get(getIndex());
+                    String choosedValue = comboBox.getValue();
+
+                    if (choosedValue.equals(Strings.EMPTY)) {
+                        orarRow.setDeleted();
+                    } else {
+                        OrarDto orarForProf = serviceHandler.getOrarService().checkAvailabilityOfProfForDay(orarRow, orarHandler.getChoosedProfesorDto(choosedValue));
+                        if (orarForProf == null) {
+                            orarRow.setDiscProf(comboBox.getValue(), orarHandler.getAllDiscProf());
+                            orarRow.setModified();
+                            setGraphic(null);
+                            orarTable.refresh();
+                            savePane.setVisible(false);
+                        } else {
+                            if (orarForProf.getIdZi().equals(orarRow.getZiDto()) && orarForProf.getIdDurata().equals(orarRow.getDurataDto()) && orarForProf.getIdClasa().equals(orarHandler.getClasa())) {
+                                orarRow.setDiscProf(comboBox.getValue(), orarHandler.getAllDiscProf());
+                                orarRow.setModified();
+                                setGraphic(null);
+                                orarTable.refresh();
+                                savePane.setVisible(false);
+                                saveOrar.setDisable(false);
+                            } else {
+                                savePane.setVisible(true);
+                                mesajSavePane.setText("Profesor ocupat\nClasa: " + orarForProf.getIdClasa().getNume() + ", " + orarForProf.getIdDiscProf().getIdDisciplina().getDisciplina());
+                                orarPane.setDisable(true);
+                                saveOrar.setDisable(true);
+                                buttonOk.setOnAction(click -> {
+                                    savePane.setVisible(false);
+                                    orarTable.setItems(FXCollections.observableArrayList(orarHandler.getOrarForClass(clasaName)));
+                                    orarPane.setDisable(false);
+                                });
+                            }
+                        }
+                    }
+                });
+                setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2) {
+                        setGraphic(comboBox);
+                        comboBox.setValue(getItem());
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : item);
+            }
+        });
+
+
+        orarTable.setItems(FXCollections.observableArrayList(orarHandler.getOrarForClass(clasaName)));
+
+        saveOrar.setOnAction(event -> {
+            for (OrarHandler.OrarTable orar : orarTable.getItems()) {
+                if (orar.isWasDeleted()) {
+                    OrarDto orarDto = new OrarDto();
+                    if (orar.getId() != 0) {
+                        serviceHandler.getOrarService().delete(orarDto.getId());
+                    }
+                } else if (orar.wasModified()) {
+                    if (!orar.getDiscProf().equals(Strings.EMPTY)) {
+                        if (orar.isNew()) {
+                            OrarDto newOrar = new OrarDto();
+                            newOrar.setIdClasa(orarHandler.getClasa());
+                            newOrar.setIdZi(orar.getZiDto());
+                            newOrar.setIdDurata(orar.getDurataDto());
+                            newOrar.setIdDiscProf(orar.getDiscProfDto());
+                            serviceHandler.getOrarService().save(newOrar);
+                        } else {
+                            serviceHandler.getOrarService().update(orarHandler.getClasa(), orar.getZiDto(), orar.getDurataDto(), orar.getDiscProfDto());
+                        }
+                    }
+                }
+            }
+            mesajSavePane.setText("Succes");
+            savePane.setVisible(true);
+            orarPane.setDisable(true);
+
+            buttonOk.setOnAction(click -> {
+                orarPane.setDisable(false);
+                savePane.setVisible(false);
+            });
+        });
+
+        downloadOrar.setOnAction(event -> {
+            String fileName = PdfCreator.createPdfOrar(orarTable.getItems(), orarHandler.getClasa());
+            if (fileName != null) {
+                mesajSavePane.setText("Succes\n" + fileName);
+                savePane.setVisible(true);
+                buttonOk.setOnAction(click -> {
+                    savePane.setVisible(false);
+                });
+            } else {
+                mesajSavePane.setText("Închideți fișierul");
+                savePane.setVisible(true);
+                buttonOk.setOnAction(click -> {
+                    savePane.setVisible(false);
+                });
+            }
+        });
+        // TODO populate table method for class
     }
 
     @FXML
@@ -158,15 +428,6 @@ public class Administratie implements ControllerI {
             event.consume();
         });
         imageView.setImage(ImageHandler.byteToImage(userHandler.getUser().getPoza()));
-    }
-
-    @FXML
-    private void showProfesoriDisciplineAdmin() {
-        this.hideAll();
-        mainPaneAdmin.setVisible(true);
-        profesoriDisciplinePaneAdmin.setVisible(true);
-//        actionTableCadre.setVisible(true);
-
     }
 
     @FXML
@@ -403,7 +664,6 @@ public class Administratie implements ControllerI {
                 if (!incompleteField) {
                     for (CadreHandler.CadreTable user : tableCadre.getItems()) {
                         if (user.isNew()) {
-                            System.out.println("\n\n\n NEW\t\tNEW\t\tNEW\t\tNEW\t\tNEW\t\tNEW\t\tNEW");
                             if (user.getNume().length() < 3 || user.getPrenume().length() < 3 || user.getFunctie() == null || user.getIdnp().length() != 13 || user.getDataNastere() == null) {
                                 mesajSavePane.setText("Revizuiți campurile !");
                                 savePane.setVisible(true);
@@ -455,7 +715,6 @@ public class Administratie implements ControllerI {
                                 }
                             }
                         } else if (user.isModified()) {
-                            System.out.println("\n\n\n MDOIFIED\t\tMDOIFIED\t\tMDOIFIED\t\tMDOIFIED\t\tMDOIFIED\t\tMDOIFIED\t\t");
                             if (user.getNume().length() < 3 || user.getPrenume().length() < 3 || user.getFunctie() == null || user.getIdnp().length() != 13) {
                                 mesajSavePane.setText("Revizuiți campurile !");
                                 savePane.setVisible(true);
@@ -477,7 +736,6 @@ public class Administratie implements ControllerI {
                                 userDto.setUserType(Arrays.stream(user.getFunctie().split(","))
                                         .map(EntityTypeEnum::valueOf)
                                         .collect(Collectors.toList()));
-//                                userDto.setUserType(user.getFunctie());
                                 userDto.setTelefon(user.getTelefon());
                                 userDto.setIdnp(user.getIdnp());
                                 userDto.setDataNastere(user.getDataNastere());
@@ -491,8 +749,6 @@ public class Administratie implements ControllerI {
                                     userDto.setEmail(user.getEmail());
                                     int i = serviceHandler.getUserService().update(userDto);
                                 }
-
-//                                serviceHandler.getUserService().update(userDto);
                             }
                         }
 
@@ -500,8 +756,6 @@ public class Administratie implements ControllerI {
                 }
                 for (CadreHandler.CadreTable user : cadreHandler.getAllUsers()) {
                     if (user.isDeleted()) {
-                        System.out.println("\n\n\n DELETED\t\tDELETED\t\tDELETED\t\tDELETED\t\tDELETED\t\t");
-
                         serviceHandler.getUserService().delete(user.getId());
                     }
                 }
@@ -516,6 +770,205 @@ public class Administratie implements ControllerI {
     }
 
     @FXML
+    private void showProfesoriDisciplineAdmin() {
+        this.hideAll();
+        mainPaneAdmin.setVisible(true);
+        profesoriDisciplinePaneAdmin.setVisible(true);
+
+        discipline = new DiscProfHandler();
+        this.initializeProfDiscTable();
+
+        // save
+        saveProfDiscTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                boolean incompleteField = false;
+
+                for (DiscProfHandler.DiscProfTable discProfTable : profDiscTable.getItems()) {
+                    if (discProfTable.getDiscipline() == null || discProfTable.getDiscipline().isEmpty()) {
+                        mesajSavePane.setText("Profesor fară disciplină !");
+                        savePane.setVisible(true);
+                        buttonOk.setOnAction(event -> {
+                            mesajSavePane.setText("");
+                            savePane.setVisible(false);
+                        });
+                        incompleteField = true;
+                        break;
+                    } else {
+                        buttonOk.setOnAction(event -> {
+                            mesajSavePane.setText("");
+                            savePane.setVisible(false);
+                            tableCadre.getItems().clear();
+                            start();
+                        });
+                    }
+                }
+
+                if (!incompleteField) {
+                    for (DiscProfHandler.DiscProfTable discProfTable : profDiscTable.getItems()) {
+                        if (discProfTable.isModified()) {
+                            serviceHandler.getDisciplinaProfesorService().updateDiscsForProf(discProfTable.getProfesorDto(), discProfTable.getDiscipline());
+                        }
+                    }
+                    discipline = new DiscProfHandler();
+                    initializeProfDiscTable();
+                    disciplineTable.setItems(FXCollections.observableArrayList(discipline.getAllDisicipline()));
+                    mesajSavePane.setText("Succes");
+                    savePane.setVisible(true);
+                    buttonOk.setOnAction(event -> {
+                        savePane.setVisible(false);
+                    });
+                }
+
+            }
+        });
+
+        // 2nd table - discipline
+        disciplinaColumn.setCellValueFactory(new PropertyValueFactory<DiscProfHandler.Discipline, String>("disciplina"));
+        disciplinaColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        disciplineTable.setItems(FXCollections.observableArrayList(discipline.getAllDisicipline()));
+
+        // update
+        disciplinaColumn.setOnEditCommit(event -> {
+            int row = event.getTablePosition().getRow();
+            DiscProfHandler.Discipline rowData = event.getTableView().getItems().get(row);
+            rowData.setDisciplina(event.getNewValue());
+            rowData.setModified();
+        });
+
+        // add
+        addDisciplina.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                disciplineTable.getItems().add(new DiscProfHandler.Discipline());
+            }
+        });
+        // delete
+        final DiscProfHandler.Discipline[] selected = {null};
+        disciplineTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getClickCount() == 1) {
+                    selected[0] = disciplineTable.getSelectionModel().getSelectedItem();
+                }
+            }
+        });
+        deleteDisciplina.setOnAction((ActionEvent event) -> {
+            discipline.setDeletedDisc(selected[0]);
+            disciplineTable.getItems().remove(selected[0]);
+        });
+        // save
+        saveDiscipline.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                boolean incompleteField = false;
+
+                for (DiscProfHandler.Discipline disc : disciplineTable.getItems()) {
+                    if (disc.getDisciplina() == null || disc.getDisciplina().isEmpty()) {
+                        mesajSavePane.setText("Completați câmpurile !");
+                        savePane.setVisible(true);
+                        buttonOk.setOnAction(event -> {
+                            mesajSavePane.setText("");
+                            savePane.setVisible(false);
+                        });
+                        incompleteField = true;
+                        break;
+                    } else {
+                        buttonOk.setOnAction(event -> {
+                            mesajSavePane.setText("");
+                            savePane.setVisible(false);
+                            tableCadre.getItems().clear();
+                            start();
+                        });
+                    }
+                }
+
+                if (!incompleteField) {
+                    for (DiscProfHandler.Discipline disc : disciplineTable.getItems()) {
+                        if (disc.isNew()) {
+                            DisciplinaDto disciplinaDto = new DisciplinaDto();
+                            disciplinaDto.setDisciplina(disc.getDisciplina());
+                            serviceHandler.getDisciplinaService().save(disciplinaDto);
+                        } else if (disc.isModified()) {
+                            DisciplinaDto disciplinaDto = new DisciplinaDto();
+                            disciplinaDto.setId(disc.getId());
+                            disciplinaDto.setDisciplina(disc.getDisciplina());
+                            serviceHandler.getDisciplinaService().update(disciplinaDto);
+                        }
+                    }
+                }
+                for (DiscProfHandler.Discipline disc : discipline.getAllDisicipline()) {
+                    if (disc.isDeleted()) {
+                        serviceHandler.getDisciplinaProfesorService().deleteWhereDisc(disc.getDisciplinaDto());
+                        serviceHandler.getDisciplinaService().delete(disc.getId());
+                    }
+                }
+                discipline = new DiscProfHandler();
+                initializeProfDiscTable();
+                disciplineTable.setItems(FXCollections.observableArrayList(discipline.getAllDisicipline()));
+                mesajSavePane.setText("Succes");
+                savePane.setVisible(true);
+                buttonOk.setOnAction(event -> {
+                    savePane.setVisible(false);
+                });
+            }
+        });
+    }
+
+    @FXML
+    private void initializeProfDiscTable() {
+        profesorColumn.setCellValueFactory(new PropertyValueFactory<DiscProfHandler.DiscProfTable, String>("profesor"));
+        profesorColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        disciplinaProfColumn.setCellValueFactory(new PropertyValueFactory<DiscProfHandler.DiscProfTable, List>("disciplineName"));
+        disciplinaProfColumn.setCellFactory(column -> new TableCell<DiscProfHandler.DiscProfTable, List>() {
+            private final CheckComboBox<String> checkComboBox = new CheckComboBox<>();
+            private boolean updating = true;
+
+            {
+                checkComboBox.getItems().addAll(discipline.getAllDisicipline().stream().map(d -> d.getDisciplina()).collect(Collectors.toList()));
+                checkComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<String>) change -> {
+                    if (!updating) {
+                        updating = true;
+                        DiscProfHandler.DiscProfTable discProfTable = getTableView().getItems().get(getIndex());
+                        discProfTable.setDiscipline(checkComboBox.getCheckModel().getCheckedItems());
+                        discProfTable.setModified();
+                        updating = false;
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(List items, boolean empty) {
+                super.updateItem(items, empty);
+                if (empty) {
+                    updating = false;
+                    setGraphic(null);
+                } else {
+                    updating = true;
+                    checkComboBox.getCheckModel().clearChecks();
+                    if (getTableView().getItems().get(getIndex()).getDiscipline() != null && !getTableView().getItems().get(getIndex()).getDiscipline().isEmpty()) {
+                        for (DisciplinaDto discDto : getTableView().getItems().get(getIndex()).getDiscipline()) {
+                            int index = checkComboBox.getItems().indexOf(discDto.getDisciplina());
+                            if (index >= 0) {
+                                checkComboBox.getCheckModel().checkIndices(index);
+                            }
+                        }
+                        updating = false;
+                    } else {
+                        updating = false;
+                        checkComboBox.getCheckModel().clearChecks();
+                    }
+                    setGraphic(checkComboBox);
+                }
+            }
+        });
+        // set data
+        profDiscTable.setItems(FXCollections.observableArrayList(discipline.getProfDiscs()));
+    }
+
+
+    @FXML
     private void hideAll() {
         actionTableCadre.setVisible(false);
         savePane.setVisible(false);
@@ -524,6 +977,16 @@ public class Administratie implements ControllerI {
 
         profesoriPaneAdmin.setVisible(false);
         profesoriDisciplinePaneAdmin.setVisible(false);
+
+        orarPaneAdmin.setVisible(false);
+        orarPane.setVisible(false);
+        alegeClasaPane.setVisible(false);
+
+        blankPane.setVisible(false);
+
+        savePane.setVisible(false);
+        resetPasswordPane.setVisible(false);
+        actionTableCadre.setVisible(false);
     }
 
     @FXML

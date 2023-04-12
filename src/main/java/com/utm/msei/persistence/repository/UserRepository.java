@@ -15,6 +15,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     @Transactional
     @Modifying
+    @Query("update UserEntity u set u.password = ?1 where u.id = ?2")
+    int updatePasswordById(String password, int id);
+    @Transactional
+    @Modifying
     @Query("update UserEntity u set u.nume = ?1, u.prenume = ?2, u.userType = ?3, u.idnp = ?4, u.telefon = ?5, u.dataNastere = ?6 WHERE u.id = ?7")
     int updateNumeAndPrenumeAndUserTypeAndIdnpAndTelefonAndDataNastereBy(String nume, String prenume, String userType, String idnp, String telefon, LocalDate dataNastere, int id);
     @Transactional

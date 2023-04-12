@@ -1,10 +1,9 @@
-package com.utm.msei.converter;
+package com.utm.msei.util;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

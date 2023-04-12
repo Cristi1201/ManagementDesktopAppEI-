@@ -3,7 +3,9 @@
     -fx-text-fill: white;
 }
 .column-header {
-    -fx-background-color: #3e57c0;
+    -fx-background-color: #5873e5;
+    -fx-border-color: white;
+    -fx-border-width: 1px;
 }
 
 .table-view .column-header .arrow  {

@@ -1,9 +1,6 @@
 package com.utm.msei.controllers.administration;
 
-import com.utm.msei.controllers.administration.actions.CadreHandler;
-import com.utm.msei.controllers.administration.actions.ClaseComboBoxHandler;
-import com.utm.msei.controllers.administration.actions.DiscProfHandler;
-import com.utm.msei.controllers.administration.actions.OrarHandler;
+import com.utm.msei.controllers.administration.actions.*;
 import com.utm.msei.controllers.interfaces.ControllerI;
 import com.utm.msei.util.ImageHandler;
 import com.utm.msei.handler.StageHandler;
@@ -37,6 +34,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.utm.msei.Main.main;
 import static com.utm.msei.Main.serviceHandler;
 import static com.utm.msei.controllers.login.Login.userHandler;
 
@@ -47,13 +45,16 @@ public class Administratie implements ControllerI {
     private ImageView imageView;
 
     @FXML
-    private Text numePrenumeAdmin, statusAdmin, emailAdmin, telefonAdmin, mesajSavePane;
+    private Text numePrenumeAdmin, statusAdmin, emailAdmin, telefonAdmin, mesajSavePane, clasaText, numeTata, telefonTata, numeMama, telefonMama;
+
+    @FXML
+    private TextField iNumeTata, iPrenumeTata, iTelefonTata, iNumeMama, iPrenumeMama, iTelefonMama;
 
     @FXML
     private PasswordField passwordNow, newPassword, repeatPassword;
 
     @FXML
-    private StackPane mainPaneAdmin, profesoriPaneAdmin, profesoriDisciplinePaneAdmin, orarPaneAdmin, orarPane, alegeClasaPane, blankPane;
+    private StackPane mainPaneAdmin, profesoriPaneAdmin, profesoriDisciplinePaneAdmin, orarPaneAdmin, orarPane, alegeClasaPane, blankPane, eleviPaneAdmin;
 
     @FXML
     private TableView<CadreHandler.CadreTable> tableCadre;
@@ -74,11 +75,12 @@ public class Administratie implements ControllerI {
     @FXML
     private Button addCadre, deleteCadre, saveCadreTable, cadreAdminBtn, profDiscAdminBtn, orarAdminBtn,
             eleviAdminBtn, buttonOk, addDisciplina, deleteDisciplina, saveDiscipline, saveProfDiscTable,
-            alegeClasaOrarAdmin, saveOrar, downloadOrar, resetPasswordBtn, resetPasswordBtnAdmin, anuleazaResetPasswordBtn;
+            alegeClasaOrarAdmin, saveOrar, downloadOrar, resetPasswordBtn, resetPasswordBtnAdmin, anuleazaResetPasswordBtn,
+            modificaDiriginteBtn, modifyParentElevBtn, okParentElevBtn, salveazaModifyParent, anuleazaModifyParent;
     @FXML
     private AnchorPane mainAdmin;
     @FXML
-    private Pane savePane, resetPasswordPane;
+    private Pane savePane, resetPasswordPane, parentElevPane, modifyParentElevPane;
     @FXML
     private HBox navBar;
     @FXML
@@ -100,6 +102,12 @@ public class Administratie implements ControllerI {
 
     @FXML
     private ComboBox<String> claseComboBox = new ComboBox<>();
+    @FXML
+    private ComboBox<String> diriginteComboBox = new ComboBox<>();
+    @FXML
+    private ComboBox<String> tataComboBox = new ComboBox<>();
+    @FXML
+    private ComboBox<String> mamaComboBox = new ComboBox<>();
     private DiscProfHandler discipline;
 
     @FXML
@@ -110,6 +118,15 @@ public class Administratie implements ControllerI {
     private TableColumn<OrarHandler.OrarTable, String> durataOrarColumn;
     @FXML
     private TableColumn<OrarHandler.OrarTable, String> disciplinaOrarColumn;
+    @FXML
+    private TableView<EleviHandler.ElevTable> tableElevi;
+    @FXML
+    private TableColumn<EleviHandler.ElevTable, String> elevNumeColumn, elevPrenumeColumn, elevEmailColumn, elevTelefonColumn, elevIdnpColumn;
+    @FXML
+    private TableColumn<EleviHandler.ElevTable, LocalDate> elevDataNastereColumn;
+    @FXML
+    private TableColumn<EleviHandler.ElevTable, Void> elevParintiColumn;
+
 
     @FXML
     public void start() {
@@ -160,6 +177,471 @@ public class Administratie implements ControllerI {
         orarAdminBtn.setOnMouseClicked(event -> {
             this.showChooseClasaAdmin();
         });
+        eleviAdminBtn.setOnAction(event -> {
+            this.initializeShowElevAdmin();
+        });
+    }
+
+    @FXML
+    private void initializeShowElevAdmin() {
+        this.hideAll();
+        orarPaneAdmin.setVisible(true);
+        alegeClasaPane.setVisible(true);
+        mainPaneAdmin.setVisible(true);
+
+        ClaseComboBoxHandler claseComboBoxHandler = new ClaseComboBoxHandler();
+
+        claseComboBox.setItems(FXCollections.observableArrayList(claseComboBoxHandler.getAllClase().stream().map(c -> c.getName()).collect(Collectors.toList())));
+
+        alegeClasaOrarAdmin.setOnAction(event -> {
+            String clasaName = claseComboBox.getSelectionModel().getSelectedItem();
+            if (clasaName != null) {
+                alegeClasaPane.setVisible(false);
+                this.showElevAdmin(clasaName);
+            } else {
+                mesajSavePane.setText("Alegeti clasa");
+                savePane.setVisible(true);
+                buttonOk.setOnAction(click -> {
+                    savePane.setVisible(false);
+                });
+            }
+        });
+    }
+
+    @FXML
+    private void showElevAdmin(String clasaName) {
+        this.hideAll();
+        mainPaneAdmin.setVisible(true);
+        eleviPaneAdmin.setVisible(true);
+        actionTableCadre.setVisible(true);
+
+        LocalDate dateNow = LocalDate.now();
+        clasaText.setText("Clasa " + clasaName);
+
+        EleviHandler.DiriginteClasaComboBoxHandler diriginte = new EleviHandler.DiriginteClasaComboBoxHandler(clasaName);
+        diriginteComboBox.setItems(FXCollections.observableArrayList(diriginte.getAllProfs().stream().map(p -> p.getIdUser().getNume() + " " + p.getIdUser().getPrenume()).collect(Collectors.toList())));
+        ProfesorDto dir = diriginte.getDirForClass();
+        if (dir != null) {
+            diriginteComboBox.setValue(dir.getIdUser().getNume() + " " + dir.getIdUser().getPrenume());
+        }
+//      TODO see if up sets ok, if not, use this
+//       Loop through the ComboBox items and check for a match
+//        for (String item : comboBox.getItems()) {
+//            if (item.equals(data)) {
+//                comboBox.setValue(item);
+//                break;
+//            }
+//        }
+        modificaDiriginteBtn.setOnAction(event -> {
+            String profName = diriginteComboBox.getSelectionModel().getSelectedItem();
+            if (profName != null) {
+                diriginte.updateDirForClass(profName);
+            }
+        });
+
+
+
+
+
+        buttonOk.setOnAction(event -> {
+            mesajSavePane.setText("");
+            savePane.setVisible(false);
+            tableElevi.getItems().clear();
+            start();
+        });
+
+        // set to resize
+        profesoriPaneAdmin.heightProperty().addListener((obs, oldVal, newVal) -> {
+            double newHeight = newVal.doubleValue();
+            tableElevi.setPrefHeight(newHeight);
+        });
+        profesoriPaneAdmin.widthProperty().addListener((obs, oldVal, newVal) -> {
+            double newWidth = newVal.doubleValue();
+            tableElevi.setPrefWidth(newWidth);
+        });
+
+        // set cells
+        elevNumeColumn.setCellValueFactory(new PropertyValueFactory<EleviHandler.ElevTable, String>("nume"));
+        elevNumeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        elevPrenumeColumn.setCellValueFactory(new PropertyValueFactory<EleviHandler.ElevTable, String>("prenume"));
+        elevPrenumeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        elevEmailColumn.setCellValueFactory(new PropertyValueFactory<EleviHandler.ElevTable, String>("email"));
+        elevEmailColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        elevTelefonColumn.setCellValueFactory(new PropertyValueFactory<EleviHandler.ElevTable, String>("telefon"));
+        elevTelefonColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        elevIdnpColumn.setCellValueFactory(new PropertyValueFactory<EleviHandler.ElevTable, String>("idnp"));
+        elevIdnpColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        elevDataNastereColumn.setCellValueFactory(new PropertyValueFactory<EleviHandler.ElevTable, LocalDate>("dataNastere"));
+        elevDataNastereColumn.setCellFactory(column -> {
+            TableCell<EleviHandler.ElevTable, LocalDate> cell = new TableCell<EleviHandler.ElevTable, LocalDate>() {
+                private final DatePicker datePicker = new DatePicker();
+
+                {
+                    datePicker.setConverter(new StringConverter<LocalDate>() {
+                        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+                        @Override
+                        public String toString(LocalDate date) {
+                            if (date != null) {
+                                return dateFormatter.format(date);
+                            } else {
+                                return "";
+                            }
+                        }
+
+                        @Override
+                        public LocalDate fromString(String string) {
+                            if (string != null && !string.isEmpty()) {
+                                return LocalDate.parse(string, dateFormatter);
+                            } else {
+                                return null;
+                            }
+                        }
+                    });
+
+                    datePicker.setOnAction(event -> {
+                        LocalDate date = datePicker.getValue();
+                        if (date.isAfter(dateNow)) {
+                            savePane.toFront();
+                            mesajSavePane.setText("Revizuiți data !");
+                            savePane.setVisible(true);
+                            getTableView().getItems().get(getIndex()).setDataNastere(date);
+                            datePicker.setValue(date);
+                            buttonOk.setOnAction(click -> {
+                                savePane.setVisible(false);
+                                savePane.toFront();
+                            });
+                        } else {
+                            EleviHandler.ElevTable cadreTable = getTableView().getItems().get(getIndex());
+                            if (cadreTable.getDataNastere() == null || (cadreTable.getDataNastere()!=null && !cadreTable.getDataNastere().equals(date))) {
+                                cadreTable.setDataNastere(date);
+                                cadreTable.setModified();
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                protected void updateItem(LocalDate date, boolean empty) {
+                    super.updateItem(date, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        datePicker.setValue(date);
+                        setGraphic(datePicker);
+                    }
+                }
+            };
+            return cell;
+        });
+        elevParintiColumn.setCellFactory(column -> {
+            return new TableCell<EleviHandler.ElevTable, Void>() {
+                private final Button button = new Button("Parinti");
+
+                {
+                    button.setOnAction(event -> {
+                        EleviHandler.ElevTable person = getTableRow().getItem();
+                        showParent(person);
+                    });
+                }
+
+                @Override
+                protected void updateItem(Void item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(button);
+                    }
+                }
+            };
+        });
+
+        // set buttons positions
+        eleviPaneAdmin.setAlignment(addCadre, Pos.TOP_RIGHT);
+        eleviPaneAdmin.setMargin(addCadre, new Insets(0, 0, 0, 0));
+        eleviPaneAdmin.setAlignment(deleteCadre, Pos.TOP_RIGHT);
+        eleviPaneAdmin.setMargin(deleteCadre, new Insets(addCadre.getHeight() + 2, 0, 0, 0));
+        eleviPaneAdmin.setAlignment(saveCadreTable, Pos.BOTTOM_RIGHT);
+        eleviPaneAdmin.setMargin(saveCadreTable, new Insets(0, 0, 0, 0));
+
+        EleviHandler eleviHandler = new EleviHandler(clasaName);
+        tableElevi.setItems(FXCollections.observableArrayList(eleviHandler.getAllElevi()));
+
+        // update
+        elevNumeColumn.setOnEditCommit(event -> {
+            int row = event.getTablePosition().getRow();
+            EleviHandler.ElevTable rowData = event.getTableView().getItems().get(row);
+            rowData.setNume(event.getNewValue());
+            rowData.setModified();
+        });
+        elevPrenumeColumn.setOnEditCommit(event -> {
+            int row = event.getTablePosition().getRow();
+            EleviHandler.ElevTable rowData = event.getTableView().getItems().get(row);
+            rowData.setPrenume(event.getNewValue());
+            rowData.setModified();
+        });
+        elevTelefonColumn.setOnEditCommit(event -> {
+            int row = event.getTablePosition().getRow();
+            EleviHandler.ElevTable rowData = event.getTableView().getItems().get(row);
+            rowData.setTelefon(event.getNewValue());
+            rowData.setModified();
+        });
+        elevIdnpColumn.setOnEditCommit(event -> {
+            int row = event.getTablePosition().getRow();
+            EleviHandler.ElevTable rowData = event.getTableView().getItems().get(row);
+            rowData.setIdnp(event.getNewValue());
+            rowData.setModified();
+        });
+        elevDataNastereColumn.setOnEditCommit(event -> {
+            int row = event.getTablePosition().getRow();
+            EleviHandler.ElevTable rowData = event.getTableView().getItems().get(row);
+            rowData.setDataNastere(event.getNewValue());
+            rowData.setModified();
+        });
+
+        // add
+        addCadre.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                tableElevi.getItems().add(new EleviHandler.ElevTable());
+            }
+        });
+
+        // delete
+        final EleviHandler.ElevTable[] selected = {null};
+        tableElevi.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getClickCount() == 1) {
+                    selected[0] = tableElevi.getSelectionModel().getSelectedItem();
+                }
+            }
+        });
+        deleteCadre.setOnAction((ActionEvent event) -> {
+            eleviHandler.setDeleted(selected[0]);
+            tableElevi.getItems().remove(selected[0]);
+        });
+
+        // save
+        saveCadreTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                boolean incompleteField = false;
+
+                for (EleviHandler.ElevTable user : tableElevi.getItems()) {
+                    if (user.getDataNastere().isAfter(dateNow)) {
+                            mesajSavePane.setText("Revizuiți data !");
+                            savePane.toFront();
+                            savePane.setVisible(true);
+                            buttonOk.setOnAction(click -> {
+                                savePane.setVisible(false);
+                                savePane.toBack();
+                            });
+                        incompleteField = true;
+                    } else if (user.getNume() == null || user.getPrenume() == null || user.getIdnp() == null) {
+                        mesajSavePane.setText("Completați câmpurile !");
+                        savePane.toFront();
+                        savePane.setVisible(true);
+                        buttonOk.setOnAction(event -> {
+                            mesajSavePane.setText("");
+                            savePane.toBack();
+                            savePane.setVisible(false);
+                        });
+                        incompleteField = true;
+                        break;
+                    } else {
+                        buttonOk.setOnAction(event -> {
+                            mesajSavePane.setText("");
+                            savePane.setVisible(false);
+                            tableCadre.getItems().clear();
+                            start();
+                        });
+                    }
+                }
+
+                if (!incompleteField) {
+                    for (EleviHandler.ElevTable user : tableElevi.getItems()) {
+                        if (user.isNew()) {
+                            if (user.getNume().length() < 3 || user.getPrenume().length() < 3 || user.getIdnp().length() != 13 || user.getDataNastere() == null) {
+                                mesajSavePane.setText("Revizuiți campurile !");
+                                savePane.setVisible(true);
+                                buttonOk.setOnAction(event -> {
+                                    mesajSavePane.setText("");
+                                    savePane.setVisible(false);
+                                });
+                            } else {
+                                buttonOk.setOnAction(event -> {
+                                    mesajSavePane.setText("");
+                                    savePane.setVisible(false);
+                                    tableCadre.getItems().clear();
+                                    start();
+                                });
+
+                                UserDto userDto = new UserDto();
+                                userDto.setNume(user.getNume());
+                                userDto.setPrenume(user.getPrenume());
+                                userDto.setUserType(List.of(EntityTypeEnum.ELEV));
+                                userDto.setTelefon(user.getTelefon());
+                                userDto.setIdnp(user.getIdnp());
+                                userDto.setDataNastere(user.getDataNastere());
+                                userDto.setPoza(ImageHandler.imageToByte());
+                                String email = "e-" + userDto.getNume() + "." + userDto.getPrenume() + "@msei.md";
+                                userDto.setEmail(email);
+                                String salt = PasswordHandler.generateSalt();
+                                userDto.setPassword(PasswordHandler.getRecordFromSaltAndHash(salt, PasswordHandler.hashPassword(email, salt)));
+                                UserDto userDtoDb = serviceHandler.getUserService().save(userDto);
+
+                                ElevDto newElev = new ElevDto(userDtoDb);
+                                newElev.setIdClasa(eleviHandler.getClasa().getId());
+                                serviceHandler.getElevService().save(newElev);
+                            }
+                        } else if (user.isModified()) {
+                            if (user.getNume().length() < 3 || user.getPrenume().length() < 3 || user.getIdnp().length() != 13) {
+                                mesajSavePane.setText("Revizuiți campurile !");
+                                savePane.setVisible(true);
+                                buttonOk.setOnAction(event -> {
+                                    mesajSavePane.setText("");
+                                    savePane.setVisible(false);
+                                });
+                            } else {
+                                buttonOk.setOnAction(event -> {
+                                    mesajSavePane.setText("");
+                                    savePane.setVisible(false);
+                                    tableCadre.getItems().clear();
+                                    start();
+                                });
+                                UserDto userDto = new UserDto();
+                                userDto.setId(user.getUserDto().getId());
+                                userDto.setNume(user.getNume());
+                                userDto.setPrenume(user.getPrenume());
+                                userDto.setTelefon(user.getTelefon());
+                                userDto.setIdnp(user.getIdnp());
+                                userDto.setDataNastere(user.getDataNastere());
+                                int i = serviceHandler.getUserService().update(userDto);
+                            }
+                        }
+
+                    }
+                    for (EleviHandler.ElevTable user : eleviHandler.getAllElevi()) {
+                        if (user.isDeleted()) {
+                            serviceHandler.getUserService().delete(user.getUserDto().getId());
+                        }
+                    }
+                    savePane.toFront();
+                    savePane.setVisible(true);
+                    savePane.getParent();
+                    mesajSavePane.setText("Succes");
+                    buttonOk.setOnAction(event -> {
+                        savePane.setVisible(false);
+                        savePane.toBack();
+                        start();
+                    });
+                }
+            }
+        });
+    }
+
+    @FXML
+    private void showParent(EleviHandler.ElevTable person) {
+        parentElevPane.setVisible(true);
+        TataDto tata = person.getTataDto();
+        MamaDto mama = person.getMamaDto();
+        if (tata != null) {
+            String numePrenumeTata = tata.getNume() + " " + tata.getPrenume();
+            numeTata.setText(numePrenumeTata.trim().isEmpty() ? "-" : numePrenumeTata);
+            telefonTata.setText(tata.getTelefon().isEmpty() ? "-" : tata.getTelefon());
+        } else {
+            numeTata.setText("-");
+            telefonTata.setText("-");
+        }
+
+        if (mama != null) {
+            String numePrenumeMama = mama.getNume() + " " + mama.getPrenume();
+            numeMama.setText(numePrenumeMama.trim().isEmpty() ? "-" : numePrenumeMama);
+            telefonMama.setText(mama.getTelefon().isEmpty() ? "-" : mama.getTelefon());
+        } else {
+            numeMama.setText("-");
+            telefonMama.setText("-");
+        }
+
+        okParentElevBtn.setOnAction(click -> {
+            parentElevPane.setVisible(false);
+        });
+
+        modifyParentElevBtn.setOnAction(click -> {
+            parentElevPane.setVisible(false);
+            showModifyParent(person);
+        });
+    }
+
+    @FXML
+    private void showModifyParent(EleviHandler.ElevTable person) {
+        modifyParentElevPane.setVisible(true);
+        TataDto tata = person.getTataDto();
+        MamaDto mama = person.getMamaDto();
+
+        ParintiHandler parinti = new ParintiHandler(person);
+
+        tataComboBox.setItems(FXCollections.observableArrayList(parinti.getAllTata().stream().map(t -> t.getNume() + " " + t.getPrenume() + ", " + t.getTelefon()).collect(Collectors.toList())));
+        TataDto tataDtoOfElev = parinti.getTataDto(person);
+        if (tataDtoOfElev != null) {
+            tataComboBox.setValue(tataDtoOfElev.getNume() + " " + tataDtoOfElev.getPrenume());
+        }
+        mamaComboBox.setItems(FXCollections.observableArrayList(parinti.getAllMama().stream().map(m -> m.getNume() + " " + m.getPrenume() + ", " + m.getTelefon()).collect(Collectors.toList())));
+        MamaDto mamaDtoOfElev = parinti.getMamaDto(person);
+        if (mamaDtoOfElev != null) {
+            mamaComboBox.setValue(mamaDtoOfElev.getNume() + " " + mamaDtoOfElev.getPrenume());
+        }
+        tataComboBox.setOnAction(event -> {
+            String selectedValue = tataComboBox.getValue();
+            TataDto choosedTata = parinti.getTataDto(selectedValue);
+            iNumeTata.setText(choosedTata.getNume());
+            iPrenumeTata.setText(choosedTata.getPrenume());
+            iTelefonTata.setText(choosedTata.getTelefon());
+        });
+        mamaComboBox.setOnAction(event -> {
+            String selectedValue = mamaComboBox.getValue();
+            MamaDto choosedMama = parinti.getMamaDto(selectedValue);
+            iNumeMama.setText(choosedMama.getNume());
+            iPrenumeMama.setText(choosedMama.getPrenume());
+            iTelefonMama.setText(choosedMama.getTelefon());
+        });
+
+        salveazaModifyParent.setOnAction(event -> {
+            if (!iNumeTata.getText().trim().isEmpty() && !iPrenumeTata.getText().trim().isEmpty() && !iTelefonTata.getText().trim().isEmpty() &&
+                    !iNumeMama.getText().trim().isEmpty() && !iPrenumeMama.getText().trim().isEmpty() && !iTelefonMama.getText().trim().isEmpty()) {
+                boolean saved = parinti.saveParent(iNumeTata.getText(), iPrenumeTata.getText(), iTelefonTata.getText(), iNumeMama.getText(), iPrenumeMama.getText(), iTelefonMama.getText());
+                if (saved) {
+                    savePane.setVisible(true);
+                    mesajSavePane.setText("Succes");
+                    savePane.toFront();
+                    buttonOk.setOnAction(click -> {
+                        savePane.setVisible(false);
+                        modifyParentElevPane.setVisible(false);
+                        savePane.toFront();
+                    });
+                } else {
+                    savePane.setVisible(true);
+                    savePane.toFront();
+                    mesajSavePane.setText("Eroare");
+                    buttonOk.setOnAction(click -> {
+                        savePane.toBack();
+                        savePane.setVisible(false);
+                    });
+                }
+            }
+        });
+
+
+
+
+//        EleviHandler.DiriginteClasaComboBoxHandler diriginte = new EleviHandler.DiriginteClasaComboBoxHandler(clasaName);
+//        diriginteComboBox.setItems(FXCollections.observableArrayList(diriginte.getAllProfs().stream().map(p -> p.getIdUser().getNume() + " " + p.getIdUser().getPrenume()).collect(Collectors.toList())));
+//        ProfesorDto dir = diriginte.getDirForClass();
+//        if (dir != null) {
+//            diriginteComboBox.setValue(dir.getIdUser().getNume() + " " + dir.getIdUser().getPrenume());
+//        }
     }
 
     @FXML
@@ -224,7 +706,7 @@ public class Administratie implements ControllerI {
                     });
                 }
             } else {
-                savePane.toFront();
+//                savePane.toFront();
                 savePane.setVisible(true);
                 mesajSavePane.setText("Ați introdus greșit");
                 resetPasswordPane.setDisable(true);
@@ -548,8 +1030,10 @@ public class Administratie implements ControllerI {
                             });
                         } else {
                             CadreHandler.CadreTable cadreTable = getTableView().getItems().get(getIndex());
-                            cadreTable.setDataNastere(date);
-                            cadreTable.setModified();
+                            if (!cadreTable.getDataNastere().equals(date)) {
+                                cadreTable.setDataNastere(date);
+                                cadreTable.setModified();
+                            }
                         }
                     });
                 }
@@ -741,13 +1225,13 @@ public class Administratie implements ControllerI {
                                 userDto.setDataNastere(user.getDataNastere());
                                 if (userDto.getUserType().contains(EntityTypeEnum.DIRECTOR)) {
                                     userDto.setEmail(user.getEmail());
-                                    int i = serviceHandler.getUserService().update(userDto);
+                                    int i = serviceHandler.getUserService().updateAdminOrProf(userDto);
                                 } else if (userDto.getUserType().contains(EntityTypeEnum.ADJUNCT)) {
                                     userDto.setEmail(user.getEmail());
-                                    int i = serviceHandler.getUserService().update(userDto);
+                                    int i = serviceHandler.getUserService().updateAdminOrProf(userDto);
                                 } else if (userDto.getUserType().contains(EntityTypeEnum.PROFESOR)) {
                                     userDto.setEmail(user.getEmail());
-                                    int i = serviceHandler.getUserService().update(userDto);
+                                    int i = serviceHandler.getUserService().updateAdminOrProf(userDto);
                                 }
                             }
                         }
@@ -970,23 +1454,39 @@ public class Administratie implements ControllerI {
 
     @FXML
     private void hideAll() {
-        actionTableCadre.setVisible(false);
-        savePane.setVisible(false);
-
         mainPaneAdmin.setVisible(false);
-
         profesoriPaneAdmin.setVisible(false);
         profesoriDisciplinePaneAdmin.setVisible(false);
-
         orarPaneAdmin.setVisible(false);
         orarPane.setVisible(false);
         alegeClasaPane.setVisible(false);
-
-        blankPane.setVisible(false);
-
         savePane.setVisible(false);
         resetPasswordPane.setVisible(false);
+        blankPane.setVisible(false);
+        eleviPaneAdmin.setVisible(false);
         actionTableCadre.setVisible(false);
+        parentElevPane.setVisible(false);
+        modifyParentElevPane.setVisible(false);
+
+
+
+//        actionTableCadre.setVisible(false);
+//        savePane.setVisible(false);
+//
+//        mainPaneAdmin.setVisible(false);
+//
+//        profesoriPaneAdmin.setVisible(false);
+//        profesoriDisciplinePaneAdmin.setVisible(false);
+//
+//        orarPaneAdmin.setVisible(false);
+//        orarPane.setVisible(false);
+//        alegeClasaPane.setVisible(false);
+//
+//        blankPane.setVisible(false);
+//
+//        savePane.setVisible(false);
+//        resetPasswordPane.setVisible(false);
+//        actionTableCadre.setVisible(false);
     }
 
     @FXML

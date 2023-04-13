@@ -6,7 +6,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -15,6 +15,11 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     @Transactional
     @Modifying
+    @Query("update UserEntity u set u.nume = ?1, u.prenume = ?2, u.idnp = ?3, u.telefon = ?4, u.dataNastere = ?5 " +
+            "where u.id = ?6")
+    int updateNumeAndPrenumeAndIdnpAndTelefonAndDataNastereById(String nume, String prenume, String idnp, String telefon, LocalDate dataNastere, int id);
+    @Transactional
+    @Modifying
     @Query("update UserEntity u set u.password = ?1 where u.id = ?2")
     int updatePasswordById(String password, int id);
     @Transactional
@@ -33,4 +38,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     @Modifying
     @Query("update UserEntity u set u.nume = ?1, u.prenume = ?2")
     int update(String nume, String prenume);
+
+    @Query("select u from UserEntity u where u.userType like concat('%', ?1, '%') OR u.userType like concat('%', ?2, '%') OR u.userType like concat('%', ?3, '%')")
+    List<UserEntity> findByUserTypeContains(String userType1, String userType2, String userType3);
+
 }

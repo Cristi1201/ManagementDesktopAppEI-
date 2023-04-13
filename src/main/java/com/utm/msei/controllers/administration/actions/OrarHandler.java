@@ -241,11 +241,6 @@ public class OrarHandler {
         }
     }
 
-
-
-
-
-
     //    example singleChoice comboBox for tableView
     public static class DiscProfComboBox implements Callback<TableColumn<OrarTable, String>, TableCell<OrarTable, String>> {
         private List<String> options;

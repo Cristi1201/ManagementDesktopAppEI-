@@ -26,7 +26,7 @@ public class CadreHandler {
     private List<CadreTable> allUsersTable;
 
     public CadreHandler() {
-        allUsers = serviceHandler.getUserService().getAll();
+        allUsers = serviceHandler.getUserService().getAllCadre();
         allUsersTable = allUsers.stream().map(user -> new CadreTable(user.getId(), user.getNume(), user.getPrenume(), user.getEmail(), user.getUserType().stream().map(Enum::name)
                 .collect(Collectors.joining(",")), user.getTelefon(), user.getIdnp(), user.getDataNastere())).collect(Collectors.toList());
     }

@@ -15,7 +15,8 @@ public class ServiceHandler {
     private MesajeService mesajeService;
     private NoteService noteService;
     private OrarService orarService;
-    private ParintiService parintiService;
+    private TataService tataService;
+    private MamaService mamaService;
     private ProfesorService profesorService;
     private  TemaAcasaService temaAcasaService;
     private UserService userService;
@@ -65,8 +66,11 @@ public class ServiceHandler {
         this.orarService = orarService;
     }
 
-    public void setParintiService(ParintiService parintiService) {
-        this.parintiService = parintiService;
+    public void setTataService(TataService tataService) {
+        this.tataService = tataService;
+    }
+    public void setMamaService(MamaService mamaService) {
+        this.mamaService = mamaService;
     }
 
     public void setProfesorService(ProfesorService profesorService) {
@@ -129,8 +133,11 @@ public class ServiceHandler {
         return orarService;
     }
 
-    public ParintiService getParintiService() {
-        return parintiService;
+    public TataService getTataService() {
+        return tataService;
+    }
+    public MamaService getMamaService() {
+        return mamaService;
     }
 
     public ProfesorService getProfesorService() {
@@ -148,4 +155,6 @@ public class ServiceHandler {
     public ZiSaptamanaService getZiSaptamanaService() {
         return ziSaptamanaService;
     }
+
+
 }

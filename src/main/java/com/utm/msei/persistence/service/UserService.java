@@ -5,7 +5,6 @@ import com.utm.msei.persistence.dto.ProfesorDto;
 import com.utm.msei.persistence.dto.UserDto;
 import com.utm.msei.persistence.dto.enums.EntityTypeEnum;
 import com.utm.msei.persistence.mapper.AdministratieMapper;
-import com.utm.msei.persistence.mapper.ParintiMapper;
 import com.utm.msei.persistence.mapper.ProfesorMapper;
 import com.utm.msei.persistence.mapper.UserMapper;
 import com.utm.msei.persistence.repository.AdministratieRepository;
@@ -79,11 +78,11 @@ public class UserService {
         return null;
     }
 
-    public List<UserDto> getAll() {
-        return userMapper.toDto(userRepository.findAll());
+    public List<UserDto> getAllCadre() {
+        return userMapper.toDto(userRepository.findByUserTypeContains(EntityTypeEnum.DIRECTOR.name(), EntityTypeEnum.ADJUNCT.name(), EntityTypeEnum.PROFESOR.name()));
     }
 
-    public int update(UserDto userDto) {
+    public int updateAdminOrProf(UserDto userDto) {
         /**
          * if in past was other entity (was admin and now is prof), then delete and create instance correspondingly
          */
@@ -125,5 +124,9 @@ public class UserService {
 
     public void updatePassword(int id, String pass) {
         userRepository.updatePasswordById(pass, id);
+    }
+
+    public int update(UserDto userDto) {
+        return userRepository.updateNumeAndPrenumeAndIdnpAndTelefonAndDataNastereById(userDto.getNume(), userDto.getPrenume(), userDto.getIdnp(), userDto.getTelefon(), userDto.getDataNastere(), userDto.getId());
     }
 }

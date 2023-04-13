@@ -35,7 +35,9 @@ public class Main implements ExecuteI {
     @Autowired
     private OrarService orarService;
     @Autowired
-    private ParintiService parintiService;
+    private TataService tataService;
+    @Autowired
+    private MamaService mamaService;
     @Autowired
     private ProfesorService profesorService;
     @Autowired
@@ -69,7 +71,8 @@ public class Main implements ExecuteI {
         serviceHandler.setMesajeService(mesajeService);
         serviceHandler.setNoteService(noteService);
         serviceHandler.setOrarService(orarService);
-        serviceHandler.setParintiService(parintiService);
+        serviceHandler.setTataService(tataService);
+        serviceHandler.setMamaService(mamaService);
         serviceHandler.setProfesorService(profesorService);
         serviceHandler.setTemaAcasaService(temaAcasaService);
         serviceHandler.setUserService(userService);

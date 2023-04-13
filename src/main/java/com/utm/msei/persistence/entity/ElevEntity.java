@@ -14,9 +14,12 @@ public class ElevEntity {
     @Column(name = "id_clasa")
     private Integer idClasa;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_parinti", nullable = false)
-    private ParintiEntity idParinti;
-    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tata", nullable = false)
+    private TataEntity idTata;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_mama", nullable = false)
+    private MamaEntity idMama;
+    @OneToOne()
     @JoinColumn(name = "id_user")
     private UserEntity idUser;
 
@@ -36,14 +39,20 @@ public class ElevEntity {
         this.idClasa = idClasa;
     }
 
-    public ParintiEntity getIdParinti() {
-        return idParinti;
+    public TataEntity getIdTata() {
+        return idTata;
+    }
+    public MamaEntity getIdMama() {
+        return idMama;
     }
 
-    public void setIdParinti(ParintiEntity idParinti) {
-        this.idParinti = idParinti;
+    public void setIdTata(TataEntity idTata) {
+        this.idTata = idTata;
     }
 
+    public void setIdMama(MamaEntity idMama) {
+        this.idMama = idMama;
+    }
     public UserEntity getIdUser() {
         return idUser;
     }
@@ -61,7 +70,8 @@ public class ElevEntity {
 
         if (id != that.id) return false;
         if (idClasa != null ? !idClasa.equals(that.idClasa) : that.idClasa != null) return false;
-        if (idParinti != null ? !idParinti.equals(that.idParinti) : that.idParinti != null) return false;
+        if (idTata != null ? !idTata.equals(that.idTata) : that.idTata != null) return false;
+        if (idMama != null ? !idMama.equals(that.idMama) : that.idMama != null) return false;
         if (idUser != null ? !idUser.equals(that.idUser) : that.idUser != null) return false;
 
         return true;
@@ -71,7 +81,8 @@ public class ElevEntity {
     public int hashCode() {
         int result = id;
         result = 31 * result + (idClasa != null ? idClasa.hashCode() : 0);
-        result = 31 * result + (idParinti != null ? idParinti.hashCode() : 0);
+        result = 31 * result + (idTata != null ? idTata.hashCode() : 0);
+        result = 31 * result + (idMama != null ? idMama.hashCode() : 0);
         result = 31 * result + (idUser != null ? idUser.hashCode() : 0);
         return result;
     }
